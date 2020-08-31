@@ -117,9 +117,9 @@ while True:
     for (box, pred) in zip(locs, preds):
         # unpack the bounding box and predictions
         (startX, startY, endX, endY) = box
-        (incorrectMask, mask, withoutMask) = pred
+        (mask, withoutMask, incorrectMask) = pred
 
-        label = "nolabel"
+        label = "undefined"
         color = (0, 0, 0)
 
         max_value = max(incorrectMask, mask, withoutMask)

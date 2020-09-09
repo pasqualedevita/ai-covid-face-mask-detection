@@ -38,34 +38,63 @@ model_dir = args["model"]
 INIT_LR = os.getenv("INIT_LR")
 if INIT_LR is None:
     INIT_LR = 1e-4
-INIT_LR = float(INIT_LR)
-print(INIT_LR)
+else:
+    INIT_LR = float(INIT_LR)
 
 EPOCHS = os.getenv("EPOCHS")
 if EPOCHS is None:
     EPOCHS = 5
-EPOCHS = int(EPOCHS)
-print(EPOCHS)
+else:
+    EPOCHS = int(EPOCHS)
 
 BS = os.getenv("BS")
 if BS is None:
     BS = 32
-BS = int(BS)
-print(BS)
+else:
+    BS = int(BS)
+
 # INIT_LR = 1e-4
 # EPOCHS = 5
 # BS = 32
 
-exit()
-
 # train test size and random state
-TRAIN_TEST_SIZE = 0.25
-TRAIN_TEST_RANDOM_STATE = 42
+TRAIN_TEST_SIZE = os.getenv("TRAIN_TEST_SIZE")
+if TRAIN_TEST_SIZE is None:
+    TRAIN_TEST_SIZE = 0.25
+else:
+    TRAIN_TEST_SIZE = float(TRAIN_TEST_SIZE)
+
+TRAIN_TEST_RANDOM_STATE = os.getenv("TRAIN_TEST_RANDOM_STATE")
+if TRAIN_TEST_RANDOM_STATE is None:
+    TRAIN_TEST_RANDOM_STATE = 42
+else:
+    TRAIN_TEST_RANDOM_STATE = int(TRAIN_TEST_RANDOM_STATE)
+
+# TRAIN_TEST_SIZE = 0.25
+# TRAIN_TEST_RANDOM_STATE = 42
 
 # head model parameters
-HEAD_MODEL_POOL_SIZE = (7, 7)
-HEAD_MODEL_DENSE = 256
-HEAD_MODEL_DROPOUT = 0.25
+HEAD_MODEL_POOL_SIZE = os.getenv("HEAD_MODEL_POOL_SIZE")
+if HEAD_MODEL_POOL_SIZE is None:
+    HEAD_MODEL_POOL_SIZE = (7, 7)
+else:
+    HEAD_MODEL_POOL_SIZE = eval(HEAD_MODEL_POOL_SIZE)
+
+HEAD_MODEL_DENSE = os.getenv("HEAD_MODEL_DENSE")
+if HEAD_MODEL_DENSE is None:
+    HEAD_MODEL_DENSE = 256
+else:
+    HEAD_MODEL_DENSE = int(HEAD_MODEL_DENSE)
+
+HEAD_MODEL_DROPOUT = os.getenv("HEAD_MODEL_DROPOUT")
+if HEAD_MODEL_DROPOUT is None:
+    HEAD_MODEL_DROPOUT = 0.25
+else:
+    HEAD_MODEL_DROPOUT = float(HEAD_MODEL_DROPOUT)
+
+# HEAD_MODEL_POOL_SIZE = (7, 7)
+# HEAD_MODEL_DENSE = 256
+# HEAD_MODEL_DROPOUT = 0.25
 
 # grab the list of images in our dataset directory, then initialize the list of data (i.e., images) and class images
 print("[INFO] loading images...")
@@ -198,3 +227,23 @@ plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
 plt.savefig(model_dir+"mask_detector.png")
+
+# save model parametes
+f = open(model_dir+"parameters.txt", "x")
+f.write("INIT_LR='"+str(INIT_LR)+"'")
+f.write("\n")
+f.write("EPOCHS='"+str(EPOCHS)+"'")
+f.write("\n")
+f.write("BS='"+str(BS)+"'")
+f.write("\n")
+f.write("TRAIN_TEST_SIZE='"+str(TRAIN_TEST_SIZE)+"'")
+f.write("\n")
+f.write("TRAIN_TEST_RANDOM_STATE='"+str(TRAIN_TEST_RANDOM_STATE)+"'")
+f.write("\n")
+f.write("HEAD_MODEL_POOL_SIZE='" +
+        str(HEAD_MODEL_POOL_SIZE).replace("(", "").replace(")", "")+"'")
+f.write("\n")
+f.write("HEAD_MODEL_DENSE='"+str(HEAD_MODEL_DENSE)+"'")
+f.write("\n")
+f.write("HEAD_MODEL_DROPOUT='"+str(HEAD_MODEL_DROPOUT)+"'")
+f.close()

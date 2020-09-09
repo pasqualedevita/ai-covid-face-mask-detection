@@ -113,9 +113,6 @@ for dirname, dirs, filenames in os.walk(dataset_dir, topdown=True):
 for imagePath in imagePaths:
     # extract the class label from the filename
     label = imagePath.split(os.path.sep)[-2]
-    # jump ignored dataset
-    if label in ignored_dataset:
-        continue
 
     # load the input image (224x224) and preprocess it
     image = load_img(imagePath, target_size=(224, 224))
@@ -230,20 +227,20 @@ plt.savefig(model_dir+"mask_detector.png")
 
 # save model parametes
 f = open(model_dir+"parameters.txt", "x")
-f.write("INIT_LR=\""+str(INIT_LR)+"\"")
+f.write("INIT_LR="+str(INIT_LR))
 f.write("\n")
-f.write("EPOCHS=\""+str(EPOCHS)+"\"")
+f.write("EPOCHS="+str(EPOCHS))
 f.write("\n")
-f.write("BS=\""+str(BS)+"\"")
+f.write("BS="+str(BS))
 f.write("\n")
-f.write("TRAIN_TEST_SIZE=\""+str(TRAIN_TEST_SIZE)+"\"")
+f.write("TRAIN_TEST_SIZE="+str(TRAIN_TEST_SIZE))
 f.write("\n")
-f.write("TRAIN_TEST_RANDOM_STATE=\""+str(TRAIN_TEST_RANDOM_STATE)+"'\"")
+f.write("TRAIN_TEST_RANDOM_STATE="+str(TRAIN_TEST_RANDOM_STATE))
 f.write("\n")
 f.write("HEAD_MODEL_POOL_SIZE=\"" +
         str(HEAD_MODEL_POOL_SIZE).replace("(", "").replace(")", "")+"\"")
 f.write("\n")
-f.write("HEAD_MODEL_DENSE=\""+str(HEAD_MODEL_DENSE)+"\"")
+f.write("HEAD_MODEL_DENSE="+str(HEAD_MODEL_DENSE))
 f.write("\n")
-f.write("HEAD_MODEL_DROPOUT=\""+str(HEAD_MODEL_DROPOUT)+"\"")
+f.write("HEAD_MODEL_DROPOUT="+str(HEAD_MODEL_DROPOUT))
 f.close()

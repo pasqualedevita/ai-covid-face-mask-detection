@@ -74,12 +74,17 @@ else:
 # TRAIN_TEST_RANDOM_STATE = 42
 
 # head model parameters
-HEAD_MODEL_POOL_SIZE = os.getenv("HEAD_MODEL_POOL_SIZE")
-if HEAD_MODEL_POOL_SIZE is None:
-    HEAD_MODEL_POOL_SIZE = (7, 7)
+HEAD_MODEL_POOL_SIZE_1 = os.getenv("HEAD_MODEL_POOL_SIZE_1")
+if HEAD_MODEL_POOL_SIZE_1 is None:
+    HEAD_MODEL_POOL_SIZE_1 = 7
 else:
-    HEAD_MODEL_POOL_SIZE = tuple(map(int, HEAD_MODEL_POOL_SIZE.split(', ')))
-    # HEAD_MODEL_POOL_SIZE = eval(HEAD_MODEL_POOL_SIZE)
+    HEAD_MODEL_POOL_SIZE_1 = int(HEAD_MODEL_POOL_SIZE_1)
+
+HEAD_MODEL_POOL_SIZE_2 = os.getenv("HEAD_MODEL_POOL_SIZE_2")
+if HEAD_MODEL_POOL_SIZE_2 is None:
+    HEAD_MODEL_POOL_SIZE_2 = 7
+else:
+    HEAD_MODEL_POOL_SIZE_2 = int(HEAD_MODEL_POOL_SIZE_2)
 
 HEAD_MODEL_DENSE = os.getenv("HEAD_MODEL_DENSE")
 if HEAD_MODEL_DENSE is None:
@@ -160,7 +165,8 @@ baseModel = MobileNetV2(weights="imagenet",
 
 # construct the head of the model that will be placed on top of the base model
 headModel = baseModel.output
-headModel = AveragePooling2D(pool_size=HEAD_MODEL_POOL_SIZE)(headModel)
+headModel = AveragePooling2D(pool_size=(
+    HEAD_MODEL_POOL_SIZE_1, HEAD_MODEL_POOL_SIZE_2))(headModel)
 headModel = Flatten(name="flatten")(headModel)
 headModel = Dense(HEAD_MODEL_DENSE, activation="relu")(headModel)
 headModel = Dropout(HEAD_MODEL_DROPOUT)(headModel)
@@ -238,8 +244,9 @@ f.write("TRAIN_TEST_SIZE="+str(TRAIN_TEST_SIZE))
 f.write("\n")
 f.write("TRAIN_TEST_RANDOM_STATE="+str(TRAIN_TEST_RANDOM_STATE))
 f.write("\n")
-f.write("HEAD_MODEL_POOL_SIZE=\"" +
-        str(HEAD_MODEL_POOL_SIZE).replace("(", "").replace(")", "")+"\"")
+f.write("HEAD_MODEL_POOL_SIZE_1="+str(HEAD_MODEL_POOL_SIZE_1))
+f.write("\n")
+f.write("HEAD_MODEL_POOL_SIZE_2="+str(HEAD_MODEL_POOL_SIZE_2))
 f.write("\n")
 f.write("HEAD_MODEL_DENSE="+str(HEAD_MODEL_DENSE))
 f.write("\n")

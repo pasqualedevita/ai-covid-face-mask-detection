@@ -29,21 +29,34 @@ ap.add_argument("-m",
                 type=str,
                 default="models/mask_detector/",
                 help="path to output mask detector model")
-ap.add_argument("-i",
-                "--ignored_dataset",
-                type=str,
-                default="no_ignore",
-                help="list of ignored dataset separated by ,")
 args = vars(ap.parse_args())
 
 dataset_dir = args["dataset"]
 model_dir = args["model"]
-ignored_dataset = args["ignored_dataset"].split(',')
 
 # initialize the initial learning rate, number of epochs to train for, and batch size
-INIT_LR = 1e-4
-EPOCHS = 5
-BS = 32
+INIT_LR = os.getenv("INIT_LR")
+if INIT_LR is None:
+    INIT_LR = 1e-4
+INIT_LR = float(INIT_LR)
+print(INIT_LR)
+
+EPOCHS = os.getenv("EPOCHS")
+if EPOCHS is None:
+    EPOCHS = 5
+EPOCHS = int(EPOCHS)
+print(EPOCHS)
+
+BS = os.getenv("BS")
+if BS is None:
+    BS = 32
+BS = int(BS)
+print(BS)
+# INIT_LR = 1e-4
+# EPOCHS = 5
+# BS = 32
+
+exit()
 
 # train test size and random state
 TRAIN_TEST_SIZE = 0.25

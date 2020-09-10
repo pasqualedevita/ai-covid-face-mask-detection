@@ -138,14 +138,14 @@ labels = to_categorical(labels)
                                                   stratify=labels,
                                                   random_state=TRAIN_TEST_RANDOM_STATE)
 
-# data augmentation to construct the training image generator
-aug = ImageDataGenerator(rotation_range=20,
-                         zoom_range=0.15,
-                         width_shift_range=0.2,
-                         height_shift_range=0.2,
-                         shear_range=0.15,
-                         horizontal_flip=True,
-                         fill_mode="nearest")
+# # data augmentation to construct the training image generator
+# aug = ImageDataGenerator(rotation_range=20,
+#                          zoom_range=0.15,
+#                          width_shift_range=0.2,
+#                          height_shift_range=0.2,
+#                          shear_range=0.15,
+#                          horizontal_flip=True,
+#                          fill_mode="nearest")
 
 # load the MobileNetV2 network, ensuring the head FC layer sets are left off
 baseModel = MobileNetV2(weights="imagenet",
@@ -170,7 +170,6 @@ for layer in baseModel.layers:
 
 # compile our model
 print("[INFO] compiling model...")
-#opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 opt = Adam(learning_rate=INIT_LR)
 # perform one-hot encoding on the labels
 if len(unique_labels) == 2:
@@ -183,11 +182,13 @@ model.compile(loss=loss,
 
 # train the head of the network
 print("[INFO] training head...")
-H = model.fit(aug.flow(trainX, trainY, batch_size=BS),
+H = model.fit(x=trainX,
+              y=trainY,
+              batch_size=BS,
+              epochs=EPOCHS,
               steps_per_epoch=len(trainX) // BS,
               validation_data=(testX, testY),
-              validation_steps=len(testX) // BS,
-              epochs=EPOCHS)
+              validation_steps=len(testX) // BS)
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")

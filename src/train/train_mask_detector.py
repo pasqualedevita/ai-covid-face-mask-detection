@@ -53,10 +53,6 @@ if BS is None:
 else:
     BS = int(BS)
 
-# INIT_LR = 1e-4
-# EPOCHS = 5
-# BS = 32
-
 # train test size and random state
 TRAIN_TEST_SIZE = os.getenv("TRAIN_TEST_SIZE")
 if TRAIN_TEST_SIZE is None:
@@ -69,9 +65,6 @@ if TRAIN_TEST_RANDOM_STATE is None:
     TRAIN_TEST_RANDOM_STATE = 42
 else:
     TRAIN_TEST_RANDOM_STATE = int(TRAIN_TEST_RANDOM_STATE)
-
-# TRAIN_TEST_SIZE = 0.25
-# TRAIN_TEST_RANDOM_STATE = 42
 
 # head model parameters
 HEAD_MODEL_POOL_SIZE_1 = os.getenv("HEAD_MODEL_POOL_SIZE_1")
@@ -97,10 +90,6 @@ if HEAD_MODEL_DROPOUT is None:
     HEAD_MODEL_DROPOUT = 0.25
 else:
     HEAD_MODEL_DROPOUT = float(HEAD_MODEL_DROPOUT)
-
-# HEAD_MODEL_POOL_SIZE = (7, 7)
-# HEAD_MODEL_DENSE = 256
-# HEAD_MODEL_DROPOUT = 0.25
 
 # grab the list of images in our dataset directory, then initialize the list of data (i.e., images) and class images
 print("[INFO] loading images...")
@@ -181,7 +170,8 @@ for layer in baseModel.layers:
 
 # compile our model
 print("[INFO] compiling model...")
-opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+#opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+opt = Adam(learning_rate=INIT_LR)
 # perform one-hot encoding on the labels
 if len(unique_labels) == 2:
     loss = "binary_crossentropy"
@@ -252,3 +242,5 @@ f.write("HEAD_MODEL_DENSE="+str(HEAD_MODEL_DENSE))
 f.write("\n")
 f.write("HEAD_MODEL_DROPOUT="+str(HEAD_MODEL_DROPOUT))
 f.close()
+
+print("[INFO] train finished")

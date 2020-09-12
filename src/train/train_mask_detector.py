@@ -66,30 +66,30 @@ if TRAIN_TEST_RANDOM_STATE is None:
 else:
     TRAIN_TEST_RANDOM_STATE = int(TRAIN_TEST_RANDOM_STATE)
 
-# head model parameters
-HEAD_MODEL_POOL_SIZE_1 = os.getenv("HEAD_MODEL_POOL_SIZE_1")
-if HEAD_MODEL_POOL_SIZE_1 is None:
-    HEAD_MODEL_POOL_SIZE_1 = 7
+# train model parameters
+TRAIN_MODEL_POOL_SIZE_1 = os.getenv("TRAIN_MODEL_POOL_SIZE_1")
+if TRAIN_MODEL_POOL_SIZE_1 is None:
+    TRAIN_MODEL_POOL_SIZE_1 = 7
 else:
-    HEAD_MODEL_POOL_SIZE_1 = int(HEAD_MODEL_POOL_SIZE_1)
+    TRAIN_MODEL_POOL_SIZE_1 = int(TRAIN_MODEL_POOL_SIZE_1)
 
-HEAD_MODEL_POOL_SIZE_2 = os.getenv("HEAD_MODEL_POOL_SIZE_2")
-if HEAD_MODEL_POOL_SIZE_2 is None:
-    HEAD_MODEL_POOL_SIZE_2 = 7
+TRAIN_MODEL_POOL_SIZE_2 = os.getenv("TRAIN_MODEL_POOL_SIZE_2")
+if TRAIN_MODEL_POOL_SIZE_2 is None:
+    TRAIN_MODEL_POOL_SIZE_2 = 7
 else:
-    HEAD_MODEL_POOL_SIZE_2 = int(HEAD_MODEL_POOL_SIZE_2)
+    TRAIN_MODEL_POOL_SIZE_2 = int(TRAIN_MODEL_POOL_SIZE_2)
 
-HEAD_MODEL_DENSE = os.getenv("HEAD_MODEL_DENSE")
-if HEAD_MODEL_DENSE is None:
-    HEAD_MODEL_DENSE = 256
+TRAIN_MODEL_DENSE = os.getenv("TRAIN_MODEL_DENSE")
+if TRAIN_MODEL_DENSE is None:
+    TRAIN_MODEL_DENSE = 256
 else:
-    HEAD_MODEL_DENSE = int(HEAD_MODEL_DENSE)
+    TRAIN_MODEL_DENSE = int(TRAIN_MODEL_DENSE)
 
-HEAD_MODEL_DROPOUT = os.getenv("HEAD_MODEL_DROPOUT")
-if HEAD_MODEL_DROPOUT is None:
-    HEAD_MODEL_DROPOUT = 0.25
+TRAIN_MODEL_DROPOUT = os.getenv("TRAIN_MODEL_DROPOUT")
+if TRAIN_MODEL_DROPOUT is None:
+    TRAIN_MODEL_DROPOUT = 0.25
 else:
-    HEAD_MODEL_DROPOUT = float(HEAD_MODEL_DROPOUT)
+    TRAIN_MODEL_DROPOUT = float(TRAIN_MODEL_DROPOUT)
 
 # grab the list of images in our dataset directory, then initialize the list of data (i.e., images) and class images
 print("[INFO] loading images...")
@@ -159,10 +159,10 @@ for layer in baseModel.layers:
 # construct the trainble model that will be placed on top of the base model
 trainedModel = baseModel.output
 trainedModel.add(AveragePooling2D(pool_size=(
-    HEAD_MODEL_POOL_SIZE_1, HEAD_MODEL_POOL_SIZE_2)))
+    TRAIN_MODEL_POOL_SIZE_1, TRAIN_MODEL_POOL_SIZE_2)))
 trainedModel.add(Flatten(name="flatten"))
-trainedModel.add(Dense(units=HEAD_MODEL_DENSE, activation="relu"))
-trainedModel.add(Dropout(rate=HEAD_MODEL_DROPOUT))
+trainedModel.add(Dense(units=TRAIN_MODEL_DENSE, activation="relu"))
+trainedModel.add(Dropout(rate=TRAIN_MODEL_DROPOUT))
 # last layer needs a units number equal to the unique labels
 trainedModel.add(Dense(units=len(unique_labels), activation="softmax"))
 
@@ -181,8 +181,8 @@ model.compile(loss=loss,
               optimizer=opt,
               metrics=["accuracy"])
 
-# train the head of the network
-print("[INFO] training head...")
+# train the network
+print("[INFO] training ...")
 H = model.fit(aug.flow(train_images, train_labels, batch_size=BS),
               epochs=EPOCHS,
               steps_per_epoch=len(train_images) // BS,
@@ -234,13 +234,13 @@ f.write("TRAIN_TEST_SIZE="+str(TRAIN_TEST_SIZE))
 f.write("\n")
 f.write("TRAIN_TEST_RANDOM_STATE="+str(TRAIN_TEST_RANDOM_STATE))
 f.write("\n")
-f.write("HEAD_MODEL_POOL_SIZE_1="+str(HEAD_MODEL_POOL_SIZE_1))
+f.write("TRAIN_MODEL_POOL_SIZE_1="+str(TRAIN_MODEL_POOL_SIZE_1))
 f.write("\n")
-f.write("HEAD_MODEL_POOL_SIZE_2="+str(HEAD_MODEL_POOL_SIZE_2))
+f.write("TRAIN_MODEL_POOL_SIZE_2="+str(TRAIN_MODEL_POOL_SIZE_2))
 f.write("\n")
-f.write("HEAD_MODEL_DENSE="+str(HEAD_MODEL_DENSE))
+f.write("TRAIN_MODEL_DENSE="+str(TRAIN_MODEL_DENSE))
 f.write("\n")
-f.write("HEAD_MODEL_DROPOUT="+str(HEAD_MODEL_DROPOUT))
+f.write("TRAIN_MODEL_DROPOUT="+str(TRAIN_MODEL_DROPOUT))
 f.close()
 
 print("[INFO] train finished")

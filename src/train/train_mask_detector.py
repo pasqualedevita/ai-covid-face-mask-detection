@@ -132,41 +132,42 @@ labels = lb.fit_transform(labels)
 labels = to_categorical(labels)
 
 # partition the data into training and testing splits using 1-TRAIN_TEST_SIZE the data for training and the remaining TRAIN_TEST_SIZE for testing
-(trainX, testX, trainY, testY) = train_test_split(data,
-                                                  labels,
-                                                  test_size=TRAIN_TEST_SIZE,
-                                                  stratify=labels,
-                                                  random_state=TRAIN_TEST_RANDOM_STATE)
+(train_images, test_images, train_labels, test_labels) = train_test_split(data,
+                                                                          labels,
+                                                                          test_size=TRAIN_TEST_SIZE,
+                                                                          stratify=labels,
+                                                                          random_state=TRAIN_TEST_RANDOM_STATE)
 
 # data augmentation to construct the training image generator
-aug = ImageDataGenerator(rotation_range=20,
-                         zoom_range=0.15,
+aug = ImageDataGenerator(rotation_range=10,
+                         zoom_range=0.10,
                          width_shift_range=0.2,
                          height_shift_range=0.2,
                          shear_range=0.15,
                          horizontal_flip=True,
                          fill_mode="nearest")
 
-# load the MobileNetV2 network, ensuring the head FC layer sets are left off
+# load the MobileNetV2 network, without top layers (trainble)
 baseModel = MobileNetV2(weights="imagenet",
                         include_top=False,
                         input_tensor=Input(shape=(224, 224, 3)))
 
-# construct the head of the model that will be placed on top of the base model
-headModel = baseModel.output
-headModel = AveragePooling2D(pool_size=(
-    HEAD_MODEL_POOL_SIZE_1, HEAD_MODEL_POOL_SIZE_2))(headModel)
-headModel = Flatten(name="flatten")(headModel)
-headModel = Dense(HEAD_MODEL_DENSE, activation="relu")(headModel)
-headModel = Dropout(HEAD_MODEL_DROPOUT)(headModel)
-headModel = Dense(len(unique_labels), activation="softmax")(headModel)
-
-# place the head FC model on top of the base model (this will become the actual model we will train)
-model = Model(inputs=baseModel.input, outputs=headModel)
-
 # loop over all layers in the base model and freeze them so they will *not* be updated during the first training process
 for layer in baseModel.layers:
     layer.trainable = False
+
+# construct the trainble model that will be placed on top of the base model
+trainedModel = baseModel.output
+trainedModel.add(AveragePooling2D(pool_size=(
+    HEAD_MODEL_POOL_SIZE_1, HEAD_MODEL_POOL_SIZE_2)))
+trainedModel.add(Flatten(name="flatten"))
+trainedModel.add(Dense(units=HEAD_MODEL_DENSE, activation="relu"))
+trainedModel.add(Dropout(rate=HEAD_MODEL_DROPOUT))
+# last layer needs a units number equal to the unique labels
+trainedModel.add(Dense(units=len(unique_labels), activation="softmax"))
+
+# place the traineble FC model on top of the base model (this will become the actual model we will train)
+model = Model(inputs=baseModel.input, outputs=trainedModel)
 
 # compile our model
 print("[INFO] compiling model...")
@@ -182,21 +183,21 @@ model.compile(loss=loss,
 
 # train the head of the network
 print("[INFO] training head...")
-H = model.fit(aug.flow(trainX, trainY, batch_size=BS),
+H = model.fit(aug.flow(train_images, train_labels, batch_size=BS),
               epochs=EPOCHS,
-              steps_per_epoch=len(trainX) // BS,
-              validation_data=(testX, testY),
-              validation_steps=len(testX) // BS)
+              steps_per_epoch=len(train_images) // BS,
+              validation_data=(test_images, test_labels),
+              validation_steps=len(test_images) // BS)
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")
-predIdxs = model.predict(testX, batch_size=BS)
+predIdxs = model.predict(test_images, batch_size=BS)
 
 # for each image in the testing set we need to find the index of the label with corresponding largest predicted probability
 predIdxs = np.argmax(predIdxs, axis=1)
 
 # show a nicely formatted classification report
-print(classification_report(testY.argmax(axis=1),
+print(classification_report(test_labels.argmax(axis=1),
                             predIdxs,
                             target_names=lb.classes_))
 

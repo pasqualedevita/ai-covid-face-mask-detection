@@ -157,17 +157,17 @@ for layer in baseModel.layers:
     layer.trainable = False
 
 # construct the trainble model that will be placed on top of the base model
-trainedModel = baseModel.output
-trainedModel.add(AveragePooling2D(pool_size=(
-    TRAIN_MODEL_POOL_SIZE_1, TRAIN_MODEL_POOL_SIZE_2)))
-trainedModel.add(Flatten(name="flatten"))
-trainedModel.add(Dense(units=TRAIN_MODEL_DENSE, activation="relu"))
-trainedModel.add(Dropout(rate=TRAIN_MODEL_DROPOUT))
+trainModel = baseModel.output
+trainModel = AveragePooling2D(pool_size=(
+    TRAIN_MODEL_POOL_SIZE_1, TRAIN_MODEL_POOL_SIZE_2))(trainModel)
+trainModel = Flatten(name="flatten")(trainModel)
+trainModel = Dense(units=TRAIN_MODEL_DENSE, activation="relu")(trainModel)
+trainModel = Dropout(rate=TRAIN_MODEL_DROPOUT)(trainModel)
 # last layer needs a units number equal to the unique labels
-trainedModel.add(Dense(units=len(unique_labels), activation="softmax"))
+trainModel = Dense(units=len(unique_labels), activation="softmax")(trainModel)
 
 # place the traineble FC model on top of the base model (this will become the actual model we will train)
-model = Model(inputs=baseModel.input, outputs=trainedModel)
+model = Model(inputs=baseModel.input, outputs=trainModel)
 
 # compile our model
 print("[INFO] compiling model...")

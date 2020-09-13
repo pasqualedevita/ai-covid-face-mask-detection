@@ -1,5 +1,5 @@
 # USAGE
-# python src/detector/video_mask_detector.py --model models/mask_detector_mydataset
+# python src/detector/video_mask_detector.py
 
 # import the necessary packages
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
@@ -73,12 +73,12 @@ ap.add_argument("-f",
                 "--face",
                 type=str,
                 default="models/face_detector",
-                help="path to face detector model directory")
+                help="path to face detector model")
 ap.add_argument("-m",
-                "--model",
+                "--mask",
                 type=str,
                 default="models/mask_detector",
-                help="path to trained face mask detector model")
+                help="path to mask detector model")
 ap.add_argument("-c",
                 "--confidence",
                 type=float,
@@ -86,17 +86,20 @@ ap.add_argument("-c",
                 help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
-# load our serialized face detector model from disk
+# load the face detector model from disk
 print("[INFO] loading face detector model...")
-prototxtPath = os.path.sep.join([args["face"],
-                                 "deploy.prototxt"])
-weightsPath = os.path.sep.join([args["face"],
-                                "res10_300x300_ssd_iter_140000.caffemodel"])
+for file in os.listdir(args["face"]):
+    if file.endswith(".prototxt"):
+        prototxtPath = os.path.sep.join([args["face"], file])
+    if file.endswith(".caffemodel"):
+        weightsPath = os.path.sep.join([args["face"], file])
 faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
 
-# load the face mask detector model from disk
-print("[INFO] loading face mask detector model...")
-maskNet = load_model(args["model"]+'/mask_detector.model')
+# load the mask detector model from disk
+print("[INFO] loading mask detector model...")
+for file in os.listdir(args["mask"]):
+    if file.endswith(".model"):
+        maskNet = load_model(os.path.sep.join([args["mask"], file]))
 
 # initialize the video stream and allow the camera sensor to warm up
 print("[INFO] starting video stream...")

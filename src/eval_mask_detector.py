@@ -30,7 +30,7 @@ def get_image_path(path, image):
     return imagePath
 
 
-def mask_detector(input_csv_file, input_dir, output_dir):
+def mask_detector(input_csv_file, input_dir, output_dir, face_detector, mask_detector, confidence):
     clean_dir(output_dir)
     output_results = []
     with open(input_csv_file, 'r') as file:
@@ -46,8 +46,11 @@ def mask_detector(input_csv_file, input_dir, output_dir):
 
             image_path = get_image_path(input_dir, input_image_name)
             image_mask_detector_result = image_mask_detector.execute(
-                image_path)
-            cv2.imwrite(output_dir+'/'+os.path.basename(image_path),
+                image_path,
+                face_detector,
+                mask_detector,
+                confidence)
+            cv2.imwrite(output_dir+os.path.basename(image_path),
                         image_mask_detector_result[0])
             output_results.append([input_image_name,
                                    image_mask_detector_result])
@@ -56,7 +59,7 @@ def mask_detector(input_csv_file, input_dir, output_dir):
 
 
 def save_results(mask_detector_results, output_dir):
-    with open(output_dir+'/data.csv', 'w', newline='') as file:
+    with open(output_dir+'data.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(
             ["image", "with_mask", "without_mask", "with_incorrect_mask"])
@@ -111,16 +114,19 @@ def eval_accuracy(input_csv_file, ouput_csv_file, output_dir):
         count_images_ok = count_images_ok + 1
 
     accuracy = count_images_ok / count_images
-    with open(output_dir+'/accuracy.txt', 'w') as output:
+    with open(output_dir+'accuracy.txt', 'w') as output:
         output.write(str(accuracy))
     return accuracy
 
 
-def execute(input_dir, output_dir):
+def execute(input_dir='testset/input/', output_dir='testset/output/', face_detector='models/face_detector/', mask_detector='models/mask_detector/', confidence=0.6):
     input_csv_file = get_csv_path(input_dir)
     mask_detector_results = mask_detector(input_csv_file,
                                           input_dir,
-                                          output_dir)
+                                          output_dir,
+                                          face_detector,
+                                          mask_detector,
+                                          confidence)
     save_results(mask_detector_results, output_dir)
     output_csv_file = get_csv_path(output_dir)
     eval_accuracy(input_csv_file, output_csv_file, output_dir)
@@ -139,7 +145,25 @@ if __name__ == "__main__":
                     type=str,
                     default="testset/output",
                     help="path to output directory")
+    ap.add_argument("-f",
+                    "--face_detector",
+                    type=str,
+                    default="models/face_detector/",
+                    help="path to face detector model")
+    ap.add_argument("-m",
+                    "--mask_detector",
+                    type=str,
+                    default="models/mask_detector/",
+                    help="path to mask detector model")
+    ap.add_argument("-c",
+                    "--confidence",
+                    type=float,
+                    default=0.6,
+                    help="minimum probability to filter weak detections")
     args = vars(ap.parse_args())
 
     execute(args["input_dir"],
-            args["output_dir"])
+            args["output_dir"],
+            args["face_detector"],
+            args["mask_detector"],
+            args["confidence"])

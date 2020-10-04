@@ -154,7 +154,7 @@ def detect_mask(maskNet, image, ROIs):
     return (image, results)
 
 
-def execute(image, face_detector='models/face_detector', mask_detector='models/mask_detector', confidence=0.6):
+def execute(image, face_detector='models/face_detector/', mask_detector='models/mask_detector/', confidence=0.6):
     faceNet = load_face_detector(face_detector)
     maskNet = load_mask_detetcor(mask_detector)
     image = load_image(image)
@@ -173,17 +173,16 @@ if __name__ == "__main__":
     ap.add_argument("-i",
                     "--image",
                     type=str,
-                    default="testset/0009.jpeg",
                     help="path to input image")
     ap.add_argument("-f",
                     "--face_detector",
                     type=str,
-                    default="models/face_detector",
+                    default="models/face_detector/",
                     help="path to face detector model")
     ap.add_argument("-m",
                     "--mask_detector",
                     type=str,
-                    default="models/mask_detector",
+                    default="models/mask_detector/",
                     help="path to mask detector model")
     ap.add_argument("-c",
                     "--confidence",

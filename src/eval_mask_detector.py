@@ -101,19 +101,26 @@ def eval_accuracy(input_csv_file, ouput_csv_file, output_dir):
                 continue
             output_rows.append(row)
 
-    count_images = len(input_rows)
-    count_images_ok = 0
-    eval_count = range(0, count_images)
-    for i in eval_count:
-        if input_rows[i][1] != output_rows[i][1]:
-            continue
-        if input_rows[i][2] != output_rows[i][2]:
-            continue
-        if input_rows[i][3] != output_rows[i][3]:
-            continue
-        count_images_ok = count_images_ok + 1
+    tot_faces = 0
+    correct_faces = 0
+    eval_count = range(0, len(input_rows))
 
-    accuracy = count_images_ok / count_images
+    for i in eval_count:
+        if input_rows[i][1] == output_rows[i][1]:
+            correct_faces = correct_faces + int(input_rows[i][1])
+
+        if input_rows[i][2] == output_rows[i][2]:
+            correct_faces = correct_faces + int(input_rows[i][2])
+
+        if input_rows[i][3] == output_rows[i][3]:
+            correct_faces = correct_faces + int(input_rows[i][3])
+
+        tot_faces = tot_faces + \
+            int(input_rows[i][1]) + \
+            int(input_rows[i][2]) + int(input_rows[i][3])
+
+    accuracy = correct_faces / tot_faces
+
     with open(output_dir+'accuracy.txt', 'w') as output:
         output.write(str(accuracy))
     return accuracy

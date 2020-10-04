@@ -30,7 +30,7 @@ def get_image_path(path, image):
     return imagePath
 
 
-def mask_detector(input_csv_file, input_dir, output_dir, face_detector, mask_detector, confidence):
+def execute_mask_detector(input_csv_file, input_dir, output_dir, face_detector, mask_detector, confidence):
     clean_dir(output_dir)
     output_results = []
     with open(input_csv_file, 'r') as file:
@@ -121,12 +121,12 @@ def eval_accuracy(input_csv_file, ouput_csv_file, output_dir):
 
 def execute(input_dir='testset/input/', output_dir='testset/output/', face_detector='models/face_detector/', mask_detector='models/mask_detector/', confidence=0.6):
     input_csv_file = get_csv_path(input_dir)
-    mask_detector_results = mask_detector(input_csv_file,
-                                          input_dir,
-                                          output_dir,
-                                          face_detector,
-                                          mask_detector,
-                                          confidence)
+    mask_detector_results = execute_mask_detector(input_csv_file,
+                                                  input_dir,
+                                                  output_dir,
+                                                  face_detector,
+                                                  mask_detector,
+                                                  confidence)
     save_results(mask_detector_results, output_dir)
     output_csv_file = get_csv_path(output_dir)
     eval_accuracy(input_csv_file, output_csv_file, output_dir)

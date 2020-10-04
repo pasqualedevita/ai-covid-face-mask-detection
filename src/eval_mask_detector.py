@@ -138,12 +138,12 @@ if __name__ == "__main__":
     ap.add_argument("-i",
                     "--input_dir",
                     type=str,
-                    default="testset/input",
+                    default="testset/input/",
                     help="path to input directory")
     ap.add_argument("-o",
                     "--output_dir",
                     type=str,
-                    default="testset/output",
+                    default="testset/output/",
                     help="path to output directory")
     ap.add_argument("-f",
                     "--face_detector",

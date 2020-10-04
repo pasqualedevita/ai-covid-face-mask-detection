@@ -1,5 +1,5 @@
 # USAGE
-# python src/train/train_mask_detector.py
+# python src/train_mask_detector.py
 
 # import the necessary packages
 from tensorflow.keras.applications import MobileNetV2

@@ -171,7 +171,7 @@ model = Model(inputs=baseModel.input, outputs=trainModel)
 
 # compile our model
 print("[INFO] compiling model...")
-opt = Adam(learning_rate=INIT_LR)
+opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 # perform one-hot encoding on the labels
 if len(unique_labels) == 2:
     loss = "binary_crossentropy"

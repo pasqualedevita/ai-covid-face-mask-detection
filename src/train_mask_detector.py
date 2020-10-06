@@ -37,7 +37,7 @@ model_dir = args["model"]
 # initialize the initial learning rate, number of epochs to train for, and batch size
 INIT_LR = os.getenv("INIT_LR")
 if INIT_LR is None:
-    INIT_LR = 1e-4
+    INIT_LR = 0.0001
 else:
     INIT_LR = float(INIT_LR)
 
@@ -203,19 +203,20 @@ print(classification_report(test_labels.argmax(axis=1),
 
 # serialize the model to disk
 print("[INFO] saving mask detector model...")
-if (model_dir != ""):
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
+if os.path.exists(model_dir):
+    os.system("rm -rf "+model_dir)
+os.makedirs(model_dir)
+
 model.save(model_dir+"mask_detector.model", save_format="h5")
 
 # plot the training loss and accuracy
-N = EPOCHS
+print("[INFO] saving plot training loss and accuracy...")
 plt.style.use("ggplot")
 plt.figure()
-plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
-plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
-plt.plot(np.arange(0, N), H.history["accuracy"], label="train_acc")
-plt.plot(np.arange(0, N), H.history["val_accuracy"], label="val_acc")
+plt.plot(np.arange(0, EPOCHS), H.history["loss"], label="train_loss")
+plt.plot(np.arange(0, EPOCHS), H.history["val_loss"], label="val_loss")
+plt.plot(np.arange(0, EPOCHS), H.history["accuracy"], label="train_acc")
+plt.plot(np.arange(0, EPOCHS), H.history["val_accuracy"], label="val_acc")
 plt.title("Training Loss and Accuracy")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
@@ -223,6 +224,7 @@ plt.legend(loc="lower left")
 plt.savefig(model_dir+"mask_detector.png")
 
 # save model parametes
+print("[INFO] saving model parametes...")
 f = open(model_dir+"parameters.txt", "x")
 f.write("INIT_LR="+str(INIT_LR))
 f.write("\n")

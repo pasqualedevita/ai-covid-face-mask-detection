@@ -152,10 +152,6 @@ baseModel = MobileNetV2(weights="imagenet",
                         include_top=False,
                         input_tensor=Input(shape=(224, 224, 3)))
 
-# loop over all layers in the base model and freeze them so they will *not* be updated during the first training process
-for layer in baseModel.layers:
-    layer.trainable = False
-
 # construct the trainble model that will be placed on top of the base model
 trainModel = baseModel.output
 trainModel = AveragePooling2D(pool_size=(
@@ -168,6 +164,10 @@ trainModel = Dense(units=len(unique_labels), activation="softmax")(trainModel)
 
 # place the traineble FC model on top of the base model (this will become the actual model we will train)
 model = Model(inputs=baseModel.input, outputs=trainModel)
+
+# loop over all layers in the base model and freeze them so they will *not* be updated during the first training process
+for layer in baseModel.layers:
+    layer.trainable = False
 
 # compile our model
 print("[INFO] compiling model...")

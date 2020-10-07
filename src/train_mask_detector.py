@@ -171,7 +171,8 @@ for layer in baseModel.layers:
 
 # compile our model
 print("[INFO] compiling model...")
-opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+# opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+opt = Adam(lr=INIT_LR)
 # perform one-hot encoding on the labels
 if len(unique_labels) == 2:
     loss = "binary_crossentropy"

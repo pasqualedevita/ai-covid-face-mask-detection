@@ -185,9 +185,7 @@ model.compile(loss=loss,
 print("[INFO] training ...")
 H = model.fit(aug.flow(train_images, train_labels, batch_size=BS),
               epochs=EPOCHS,
-              steps_per_epoch=len(train_images) // BS,
-              validation_data=(test_images, test_labels),
-              validation_steps=len(test_images) // BS)
+              validation_data=(test_images, test_labels))
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")

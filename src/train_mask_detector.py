@@ -211,6 +211,12 @@ model.save(model_dir+"mask_detector.model", save_format="h5")
 
 # plot the training loss and accuracy
 print("[INFO] saving plot training loss and accuracy...")
+print(len(np.arange(0, EPOCHS)))
+print(len(H.history["loss"]))
+print(len(H.history["val_loss"]))
+print(len(H.history["accuracy"]))
+print(len(H.history["val_accuracy"]))
+
 plt.style.use("ggplot")
 plt.figure()
 plt.plot(np.arange(0, EPOCHS), H.history["loss"], label="train_loss")

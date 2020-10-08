@@ -76,6 +76,7 @@ def detect_face(image, faceNet, confidence):
         if detectedConfidence > confidence:
             # compute the (x, y)-coordinates of the bounding box for the object
             box = detection[3:7] * np.array([w, h, w, h])
+            box = box * [0.9,0.9,1.1,1.1]
             (startX, startY, endX, endY) = box.astype("int")
 
             # ensure the bounding boxes fall within the dimensions of the frame
@@ -109,8 +110,8 @@ def detect_mask(maskNet, image, ROIs):
         startY = ROI[3]
         endY = ROI[4]
 
-        (with_mask,
-         without_mask,
+        (without_mask,
+         with_mask,
          with_incorrect_mask) = maskNet.predict(face)[0]
         pred = "undefined"
         color = (0, 0, 0)

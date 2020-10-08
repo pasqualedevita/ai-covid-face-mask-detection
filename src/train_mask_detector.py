@@ -171,8 +171,8 @@ for layer in baseModel.layers:
 
 # compile our model
 print("[INFO] compiling model...")
-# opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
-opt = Adam(lr=INIT_LR)
+opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+# opt = Adam(lr=INIT_LR)
 # perform one-hot encoding on the labels
 if len(unique_labels) == 2:
     loss = "binary_crossentropy"
@@ -184,11 +184,11 @@ model.compile(loss=loss,
 
 # train the network
 print("[INFO] training ...")
-H = model.fit(x=train_images,
-              y=train_labels,
-              batch_size=BS,
+H = model.fit(aug.flow(train_images, train_labels, batch_size=BS),
               epochs=EPOCHS,
-              validation_data=(test_images, test_labels))
+              steps_per_epoch=len(train_images) // BS,
+              validation_data=(test_images, test_labels),
+              validation_steps=len(test_images) // BS)
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")

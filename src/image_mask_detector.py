@@ -58,7 +58,7 @@ def detect_face(image, faceNet, confidence):
     # construct a blob from the image
     blob = cv2.dnn.blobFromImage(image,
                                  1.0,
-                                 (300, 300),
+                                 (w, h),
                                  (104.0, 177.0, 123.0))
 
     # pass the blob through the network and obtain the face detections

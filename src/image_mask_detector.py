@@ -55,10 +55,18 @@ def detect_face(image, faceNet, confidence):
     # get image height and width image.shape[:2]
     (h, w) = image.shape[:2]
 
+    blob_h = h
+    blob_w = w
+    blob_limit = 300
+
+    if (blob_h > blob_limit) and (blob_w > blob_limit):
+        blob_h = blob_limit
+        blob_w = blob_limit
+
     # construct a blob from the image
     blob = cv2.dnn.blobFromImage(image,
                                  1.0,
-                                 (w, h),
+                                 (max(blob_h, blob_w), max(blob_h, blob_w)),
                                  (104.0, 177.0, 123.0))
 
     # pass the blob through the network and obtain the face detections
@@ -76,7 +84,7 @@ def detect_face(image, faceNet, confidence):
         if detectedConfidence > confidence:
             # compute the (x, y)-coordinates of the bounding box for the object
             box = detection[3:7] * np.array([w, h, w, h])
-            box = box * [0.9,0.9,1.1,1.1]
+            box = box * [0.9, 0.9, 1.1, 1.1]
             (startX, startY, endX, endY) = box.astype("int")
 
             # ensure the bounding boxes fall within the dimensions of the frame
@@ -163,7 +171,7 @@ def execute(image, face_detector='models/face_detector/', mask_detector='models/
     (image, results) = detect_mask(maskNet, image, ROIs)
     # show the output image
     # cv2.imshow("Output", image)
-    # cv2.waitKey(5*1000)
+    # cv2.waitKey(2*1000)
 
     return (image, results)
 

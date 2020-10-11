@@ -14,143 +14,124 @@ def clean_dir(path):
     os.makedirs(path)
 
 
-def get_csv_path(path):
-    print("[INFO] loading csv ...")
-    for file in os.listdir(path):
-        if file.endswith(".csv"):
-            csvPath = os.path.sep.join([path, file])
-    return csvPath
+def execute_mask_detector(testset_data, output, face_detector, mask_detector, confidence):
+    clean_dir(output)
+    # clean_dir(output+"with_incorrect_mask/")
+    # clean_dir(output+"with_mask/")
+    # clean_dir(output+"without_mask/")
 
-
-def get_image_path(path, image):
-    print("[INFO] loading image ...")
-    for file in os.listdir(path):
-        if file.startswith(image):
-            imagePath = os.path.sep.join([path, file])
-    return imagePath
-
-
-def execute_mask_detector(input_csv_file, input_dir, output_dir, face_detector, mask_detector, confidence):
-    clean_dir(output_dir)
     output_results = []
-    with open(input_csv_file, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            input_image_name = row[0]
-            input_with_mask_count = row[1]
-            input_without_mask_count = row[2]
-            input_with_incorrect_mask_count = row[3]
-            if input_image_name == 'image':
-                # skip header row
-                continue
-
-            image_path = get_image_path(input_dir, input_image_name)
-            image_mask_detector_result = image_mask_detector.execute(
+    for data in testset_data:
+        image_path = data[0]
+        label = data[1]
+        image_mask_detector_result = image_mask_detector.execute(
                 image_path,
                 face_detector,
                 mask_detector,
                 confidence)
-            cv2.imwrite(output_dir+os.path.basename(image_path),
-                        image_mask_detector_result[0])
-            output_results.append([input_image_name,
-                                   image_mask_detector_result])
-
+        if not os.path.exists(output+label):
+            os.makedirs(output+label)
+        cv2.imwrite(output+label+"/"+os.path.basename(image_path),image_mask_detector_result[0])
+        output_results.append([label,image_mask_detector_result])
+    
     return output_results
 
 
-def save_results(mask_detector_results, output_dir):
-    with open(output_dir+'data.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(
-            ["image", "with_mask", "without_mask", "with_incorrect_mask"])
-        for mask_detector_result in mask_detector_results:
-            image = mask_detector_result[0]
-            with_mask = 0
-            without_mask = 0
-            with_incorrect_mask = 0
-            for result in mask_detector_result[1][1]:
-                if result[0] == 'with_mask':
-                    with_mask = with_mask + 1
-                if result[0] == 'without_mask':
-                    without_mask = without_mask + 1
-                if result[0] == 'with_incorrect_mask':
-                    with_incorrect_mask = with_incorrect_mask + 1
-            writer.writerow([image,
-                             with_mask,
-                             without_mask,
-                             with_incorrect_mask])
+def eval_accuracy(mask_detector_results, output):
+    
+    with_mask_detected = 0
+    without_mask_detected = 0
+    with_incorrect_mask_detected = 0
 
+    with_mask_expected = 0
+    without_mask_expected = 0
+    with_incorrect_mask_expected = 0
 
-def eval_accuracy(input_csv_file, ouput_csv_file, output_dir):
-    input_rows = []
-    output_rows = []
+    for mask_detector_result in mask_detector_results:
+        
+        label_expected = mask_detector_result[0]
+        print("label_expected: "+label_expected)
 
-    with open(input_csv_file, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row[0] == 'image':
-                # skip header row
-                continue
-            input_rows.append(row)
+        if (label_expected == 'with_mask'):
+            with_mask_expected = with_mask_expected + 1
+        if (label_expected == 'without_mask'):
+            without_mask_expected = without_mask_expected + 1
+        if (label_expected == 'with_incorrect_mask'):
+            with_incorrect_mask_expected = with_incorrect_mask_expected + 1
+        
+        if (len(mask_detector_result[1][1]) == 1):
+            label_detected = mask_detector_result[1][1][0][0]
+            print("label_detected: "+label_detected)
+            if (label_detected == label_expected):
+                if (label_detected == 'with_mask'):
+                    with_mask_detected = with_mask_detected + 1
+                if (label_detected == 'without_mask'):
+                    without_mask_detected = without_mask_detected + 1
+                if (label_detected == 'with_incorrect_mask'):
+                    with_incorrect_mask_detected = with_incorrect_mask_detected + 1
 
-    with open(ouput_csv_file, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row[0] == 'image':
-                # skip header row
-                continue
-            output_rows.append(row)
+    accuracy_with_mask = with_mask_detected / with_mask_expected
+    accuracy_without_mask = without_mask_detected / without_mask_expected
+    accuracy_with_incorrect_mask = with_incorrect_mask_detected / with_incorrect_mask_expected
 
-    tot_faces = 0
-    correct_faces = 0
-    eval_count = range(0, len(input_rows))
+    accuracy = (with_mask_detected + without_mask_detected + with_incorrect_mask_detected) / (with_mask_expected + without_mask_expected + with_incorrect_mask_expected)
 
-    for i in eval_count:
-        if input_rows[i][1] == output_rows[i][1]:
-            correct_faces = correct_faces + int(input_rows[i][1])
-
-        if input_rows[i][2] == output_rows[i][2]:
-            correct_faces = correct_faces + int(input_rows[i][2])
-
-        if input_rows[i][3] == output_rows[i][3]:
-            correct_faces = correct_faces + int(input_rows[i][3])
-
-        tot_faces = tot_faces + \
-            int(input_rows[i][1]) + \
-            int(input_rows[i][2]) + int(input_rows[i][3])
-
-    accuracy = correct_faces / tot_faces
-
-    with open(output_dir+'accuracy.txt', 'w') as output:
-        output.write(str(accuracy))
+    with open(output+'accuracy.txt', 'w') as output:
+        output.write("accuracy_with_mask: "+str(accuracy_with_mask))
+        output.write("\n")
+        output.write("accuracy_without_mask: "+str(accuracy_without_mask))
+        output.write("\n")
+        output.write("accuracy_with_incorrect_mask: "+str(accuracy_with_incorrect_mask))
+        output.write("\n")
+        output.write("accuracy: "+str(accuracy))
     return accuracy
 
 
-def execute(input_dir='testset/input/', output_dir='testset/output/', face_detector='models/face_detector/', mask_detector='models/mask_detector/', confidence=0.6):
-    input_csv_file = get_csv_path(input_dir)
-    mask_detector_results = execute_mask_detector(input_csv_file,
-                                                  input_dir,
-                                                  output_dir,
+def load_testset_data(testset='testset/'):
+    imagePaths = []
+    testset_data = []
+    valid_images = [".jpg", ".jpeg", ".png"]
+    for dirname, dirs, filenames in os.walk(testset, topdown=True):
+        for filename in filenames:
+            ext = os.path.splitext(filename)[1]
+            if ext.lower() not in valid_images:
+                continue
+            imagePaths.append(os.path.join(dirname, filename))
+
+    # loop over the image paths
+    for imagePath in imagePaths:
+    # extract the class label from the filename
+        label = imagePath.split(os.path.sep)[-2]
+        testset_data.append([imagePath,label])
+    
+    return testset_data
+
+
+def execute(testset='testset/', output='output/', face_detector='models/face_detector/', mask_detector='models/mask_detector/', confidence=0.6):
+    
+    testset_data = load_testset_data(testset)
+    
+    mask_detector_results = execute_mask_detector(testset_data,
+                                                  output,
                                                   face_detector,
                                                   mask_detector,
                                                   confidence)
-    save_results(mask_detector_results, output_dir)
-    output_csv_file = get_csv_path(output_dir)
-    eval_accuracy(input_csv_file, output_csv_file, output_dir)
+
+    eval_accuracy(mask_detector_results, output)
 
 
 if __name__ == "__main__":
     # construct the argument parser and parse the arguments
     ap = argparse.ArgumentParser()
     ap.add_argument("-i",
-                    "--input_dir",
+                    "--testset",
                     type=str,
-                    default="testset/input/",
-                    help="path to input directory")
+                    default="testset/",
+                    help="path to input testset")
     ap.add_argument("-o",
-                    "--output_dir",
+                    "--output",
                     type=str,
-                    default="testset/output/",
+                    default="output/",
                     help="path to output directory")
     ap.add_argument("-f",
                     "--face_detector",
@@ -169,8 +150,8 @@ if __name__ == "__main__":
                     help="minimum probability to filter weak detections")
     args = vars(ap.parse_args())
 
-    execute(args["input_dir"],
-            args["output_dir"],
+    execute(args["testset"],
+            args["output"],
             args["face_detector"],
             args["mask_detector"],
             args["confidence"])

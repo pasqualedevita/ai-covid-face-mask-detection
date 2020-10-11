@@ -130,4 +130,10 @@ dmypy.json
 
 dataset/**
 testset/**
+output/**
 !README.md
+
+# vscode
+.vscode/settings.json
+
+.DS_Store

@@ -118,9 +118,9 @@ def detect_mask(maskNet, image, ROIs):
         startY = ROI[3]
         endY = ROI[4]
 
-        (without_mask,
+        (with_incorrect_mask,
          with_mask,
-         with_incorrect_mask) = maskNet.predict(face)[0]
+         without_mask) = maskNet.predict(face)[0]
         pred = "undefined"
         color = (0, 0, 0)
 
